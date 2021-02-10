@@ -1,0 +1,4 @@
+
+
+class SuchBrowserIsNotSupportedError(BaseException):
+    pass
