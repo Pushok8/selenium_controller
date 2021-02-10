@@ -1,11 +1,14 @@
 import os
+from sys import platform
 from typing import Union, Optional, NoReturn
 
 from selenium.webdriver import Firefox,FirefoxOptions, ChromeOptions, DesiredCapabilities
+from selenium.common.exceptions import SessionNotCreatedException
 from seleniumwire.webdriver import Chrome, Remote, Firefox
 
 from misc.proxy import Proxy
-from misc.annotations import StrIPAddress
+from misc.utils import check_do_have_web_drivers, get_path_to_web_driver_file
+from misc.annotations import StrIPAddress, StrFilePath
 from misc.exceptions import SuchBrowserIsNotSupportedError
 
 
@@ -22,7 +25,14 @@ class BaseSeleniumController(object):
         :param use_remote_server_address:
         :param proxy:
         """
-        path_to_browser_driver = '/home/hunt/PycharmProjects/selenium_controller/for_development/chromedriver'
+        check_do_have_web_drivers()
+        if browser_name.strip().lower() == 'firefox':
+            path_to_browser_driver: StrFilePath = get_path_to_web_driver_file('geckodriver')
+        elif browser_name.strip().lower() == 'chrome':
+            path_to_browser_driver: StrFilePath = get_path_to_web_driver_file('chromedriver')
+
+        if 'linux' in platform or platform == 'darwin':  # Linux or MacOS
+            os.chmod(path_to_browser_driver, 755)
 
         if use_remote_server_address:
             self.driver = Remote
@@ -98,14 +108,19 @@ class BaseSeleniumController(object):
                 self.driver.set_window_size(2560, 1440)
             else:
                 if browser_name.strip().lower() == 'chrome':
-                    self.driver = self.driver(executable_path=path_to_browser_driver,
-                                              desired_capabilities=desires_capabilities,
-                                              options=options)
+                    try:
+                        self.driver = self.driver(executable_path=path_to_browser_driver,
+                                                  desired_capabilities=desires_capabilities,
+                                                  options=options)
+                    except SessionNotCreatedException:
+                        raise SessionNotCreatedException('Your chrome browser is older than the web driver. Please update your browser or change'
+                                                         ' the web driver to your version or lower. Download chrome web drivers here -> https://chromedriver.chromium.org/downloads')
                 elif browser_name.strip().lower() == 'firefox':
                     self.driver = self.driver(executable_path=path_to_browser_driver,
                                               desired_capabilities=desires_capabilities,
                                               seleniumwire_options={'port': 8080},
                                               options=options)
+
                 self.driver.maximize_window()
 
     def __enter__(self):
