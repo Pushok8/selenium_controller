@@ -11,6 +11,9 @@ from misc.annotations import StrName, StrFilePath
 from misc.exceptions import WebDriverFileIsNotFoundException
 
 
+AVAILABLE_BROWSERS = ('Chrome', 'Firefox')
+
+
 def create_web_driver_folder() -> NoReturn:
     """
     Creates a web_drivers folder in the /tmp file, if the system is Linux or MacOS, or C:\Program Files\web_drivers if
@@ -29,7 +32,7 @@ def download_web_drivers() -> NoReturn:
     C:\Program Files\web_drivers if the system is windows./Скачивает веб-драйвер Chrome и Firefox в файл /tmp, если
     система Linux или MacOS, или C:\Program Files\web_drivers, если система windows
 
-    Chrome web drivers 88 version:
+    Chrome web drivers 89 version:
         Linux -> https://chromedriver.storage.googleapis.com/89.0.4389.23/chromedriver_linux64.zip
         MacOS -> https://chromedriver.storage.googleapis.com/89.0.4389.23/chromedriver_mac64.zip
         Windows -> https://chromedriver.storage.googleapis.com/89.0.4389.23/chromedriver_win32.zip
@@ -39,6 +42,16 @@ def download_web_drivers() -> NoReturn:
         MacOS -> https://github.com/mozilla/geckodriver/releases/download/v0.29.0/geckodriver-v0.29.0-macos.tar.gz
         Windows -> https://github.com/mozilla/geckodriver/releases/download/v0.29.0/geckodriver-v0.29.0-win64.zip
     """
+
+    print(r'''
+Chrome and Firefox web drivers are downloaded automatically, make sure the version of the automatically 
+downloaded chrome and Firefox web drivers is not higher than your Chrome or Firefox browser.
+Download web drivers for Chrome and Firefox using the links:
+   ChromeDrivers -> https://chromedriver.chromium.org/downloads
+   FirefoxDrivers -> https://github.com/mozilla/geckodriver/releases
+   
+Web drivers should be in /tmp/web_drivers, if your system is Linux or MacOS, or C:\Program Files\web_drivers if the system is windows.''')
+
     if 'linux' in platform:  # Linux
         chrome_web_driver = requests.get('https://chromedriver.storage.googleapis.com/89.0.4389.23/chromedriver_linux64.zip')
         firefox_web_driver = requests.get('https://github.com/mozilla/geckodriver/releases/download/v0.29.0/geckodriver-v0.29.0-linux64.tar.gz')
