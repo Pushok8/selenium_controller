@@ -1,23 +1,28 @@
 import os
+from pathlib import Path
 from sys import platform
-from typing import Union, Optional, NoReturn
+from typing import Union, Optional
 
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import SessionNotCreatedException
-from selenium.webdriver import FirefoxOptions, ChromeOptions, DesiredCapabilities
+from selenium.webdriver import DesiredCapabilities
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from seleniumwire.webdriver import Chrome, Remote, Firefox
 
 from misc.proxy import Proxy
 from misc.utils import check_do_have_web_drivers, get_path_to_web_driver_file, AVAILABLE_BROWSERS
-from misc.annotations import StrFilePath, StrSocket
+from misc.annotations import StrFilePath, StrLink, StrName, StrSocket,  FirefoxOptions, ChromeOptions  # import renamed Options object for Firefox and Chrome
 from misc.exceptions import SuchBrowserIsNotSupportedError
 
 
 class BaseSeleniumController(object):
     def __init__(self,
-                 browser_name: str = 'Chrome',
+                 browser_name: StrName = 'Chrome',
                  options: Optional[Union[FirefoxOptions, ChromeOptions]] = None,
-                 use_remote_server_socket: Optional[Union[StrSocket, bool]] = False,
-                 proxy: Optional[Proxy] = None) -> NoReturn:
+                 use_remote_server_socket: Optional[Union[StrSocket, bool]] = None,
+                 proxy: Optional[Proxy] = None,
+                 custom_path_to_web_drivers: Optional[StrFilePath] = None) -> None:
         """
         Defines by the passed arguments which driver should be created and with which options.
 
@@ -43,37 +48,51 @@ class BaseSeleniumController(object):
         Если вы передаете прокси-объект Прокси-объект, будет использоваться прокси с указанными параметрами. Прокси
         может быть с авторизация и без.
 
-        :param browser_name: the name of the browser to be used. browser_name must be specified in
-        selenium_controller.misc.utils.AVAILABLE_BROWSER. By default is Chrome. Optional/название используемого браузера.
-        browser_name должен быть указан в AVAILABLE_BROWSER. По умолчанию Chrome. Необязательно.
-        :param options: FirefoxOptions or ChromeOptions depending on which browser you are using. It will be used to
-        create the driver object, but additional arguments will be added to FirefoxOptions or ChromeOptions anyway.
-        Optional./FirefoxOptions или ChromeOptions в зависимости от того, какой браузер вы используете. Это будет
-        использоваться для создания объекта драйвера, но в любом случае дополнительные аргументы будут добавлены в
-        FirefoxOptions или ChromeOptions. Необязательно.
-        :param use_remote_server_socket: bool value or server socket. If bool value is True - will be used
+
+        :param browser_name: Optional. the name of the browser to be used. browser_name must be specified in
+        selenium_controller.misc.utils.AVAILABLE_BROWSER. By default is Chrome/Необязательно. название
+        используемого браузера. browser_name должен быть указан в AVAILABLE_BROWSER. По умолчанию Chrome.
+
+        :param options: Optional. FirefoxOptions or ChromeOptions depending on which browser you are using. It will be
+        used to create the driver object, but additional arguments will be added to FirefoxOptions or ChromeOptions
+        anyway./Необязательно. FirefoxOptions или ChromeOptions в зависимости от того, какой браузер вы используете.
+        Это будет использоваться для создания объекта драйвера, но в любом случае дополнительные аргументы будут
+        добавлены в FirefoxOptions или ChromeOptions.
+
+        :param use_remote_server_socket: Optional. bool value or server socket. If bool value is True - will be used
         127.0.0.1:4444 socket. Socket these are IP address and port separated by colon(IP_ADDRESS:PORT).
-        For example: socket it is 127.0.0.1:4444. Optional/значение bool или серверный сокет. Если значение bool равно
-        True - будет использоваться 127.0.0.1:4444 сокет. Сокет - это IP-адрес и порт, разделенные двоеточием (IP_ADDRESS: PORT).
-        Например: сокет 127.0.0.1:4444. Необязательно
-        :param proxy: Proxy object with the specified IP and port(and login and password if the proxy is with
+        For example: socket it is 127.0.0.1:4444./Необязательно. значение bool или серверный сокет. Если значение bool
+        равно True - будет использоваться 127.0.0.1:4444 сокет. Сокет - это IP-адрес и порт, разделенные двоеточием
+        (IP_ADDRESS: PORT). Например: сокет 127.0.0.1:4444.
+
+        :param proxy: Optional. Proxy object with the specified IP and port(and login and password if the proxy is with
         authorization). This proxy info is used to connect to the proxy server. If you need authorization in your proxy,
         specify login and password in Proxy object. You can get Proxy object from the selenium_controller.misc.proxy
-        module. Optional./Прокси-объект с указанными IP и port (и логином и паролем, если прокси с авторизацией). Эти
-        данные о прокси используются для подключения к прокси-серверу. Если вам нужна  авторизация в вашем прокси,
+        module./Необязательно. Прокси-объект с указанными IP и port (и логином и паролем, если прокси с авторизацией).
+        Эти данные о прокси используются для подключения к прокси-серверу. Если вам нужна  авторизация в вашем прокси,
         укажите логин и пароль в объекте Proxy. Вы можете получить объект Proxy из модуля selenium_controller.misc.proxy.
+
+        :param custom_path_to_web_drivers: Optional. The path to the folder where the Chrome and Firefox web drivers are
+        stored./Необязательно. Путь к папке, где хранятся веб-драйверы Chrome и Firefox.
         """
         if browser_name.strip().lower() not in (available_browser.lower() for available_browser in AVAILABLE_BROWSERS):
             raise SuchBrowserIsNotSupportedError(f'A browser such as {browser_name!r} does not support this controller.'
                                                  f' Please specify one of these browser: {str(AVAILABLE_BROWSERS)[1:-1]}')
 
-        check_do_have_web_drivers()
         if browser_name.strip().lower() == 'firefox':
-            path_to_browser_driver: StrFilePath = get_path_to_web_driver_file('geckodriver')
+            web_driver_name: StrName = 'geckodriver'
         elif browser_name.strip().lower() == 'chrome':
-            path_to_browser_driver: StrFilePath = get_path_to_web_driver_file('chromedriver')
+            web_driver_name: StrName = 'chromedriver'
+
+        if custom_path_to_web_drivers:
+            path_to_browser_driver: StrFilePath = Path(custom_path_to_web_drivers, web_driver_name)
+        else:
+            check_do_have_web_drivers()
+            path_to_browser_driver: StrFilePath = get_path_to_web_driver_file(web_driver_name)
         if 'linux' in platform or platform == 'darwin':  # Linux or MacOS
             os.chmod(path_to_browser_driver, 755)
+
+        del web_driver_name  # Now we don't need this variable
 
         if use_remote_server_socket:
             if use_remote_server_socket is True:
@@ -142,7 +161,7 @@ class BaseSeleniumController(object):
                                           desired_capabilities=desires_capabilities,
                                           seleniumwire_options={'addr': use_remote_server_socket.split(':')[0]},
                                           options=options)
-                self.driver.set_window_size(2560, 1440)
+                self.driver.set_window_size(2560, 1440)  # the bigger, the better. We not have limit in screen size
             else:
                 if browser_name.strip().lower() == 'chrome':
                     try:
@@ -160,8 +179,39 @@ class BaseSeleniumController(object):
 
                 self.driver.maximize_window()
 
+        driver: type[WebDriver]
+
+    def get(self, url: StrLink) -> None:
+        """
+        Opens url in current tab./Открывает url в текущей вкладке.
+
+
+        :param url: URL which you want to open on the current page./URL, который вы хотите открыть на текущей странице
+        """
+        self.driver.get(url=url)
+
+    def wait_url_contains(self, url_part: str, where_wait: Optional[type[WebDriver]] = None, wait_time: int = 30) -> None:
+        """
+        Waits for url_part to be in url./Ждет когда url_part будет в url.
+
+
+        :param url_part: the part of the url that is expected in the current url./часть URL-адреса, которая ожидается в
+        текущем URL-адресе
+
+        :param where_wait: Optional. subclasses WebDriver from selenium.webdriver.remote.webdriver.WebDriver. In this
+        object will wait when url_part to appear in url. By default, where wait is a self.driver object./Необязательно.
+        подклассы WebDriver из selenium.webdriver.remote.webdriver.WebDriver. В этом объекте будет ждать, когда url_part
+        появится в url. По умолчанию where_wait это объект self.driver.
+
+        :param wait_time: Optional. how long to wait in seconds. By default, 30/Необязательно. сколько ждать в секундах.
+        По умолчанию, 30.
+        """
+        if not where_wait:
+            where_wait = self.driver
+        WebDriverWait(where_wait, wait_time).until(EC.url_contains(url_part))
+
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.driver.quit()
