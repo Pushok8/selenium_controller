@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from sys import platform
+from functools import wraps
 from typing import Union, Optional
 
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -181,14 +182,38 @@ class BaseSeleniumController(object):
 
         driver: type[WebDriver]
 
+    @wraps(WebDriver.get)
     def get(self, url: StrLink) -> None:
-        """
-        Opens url in current tab./Открывает url в текущей вкладке.
-
-
-        :param url: URL which you want to open on the current page./URL, который вы хотите открыть на текущей странице
-        """
         self.driver.get(url=url)
+
+    @wraps(WebDriver.refresh)
+    def refresh(self):
+        self.driver.refresh()
+
+    @wraps(WebDriver.forward)
+    def forward(self):
+        self.driver.forward()
+
+    @wraps(WebDriver.back)
+    def back(self):
+        self.driver.back()
+
+    @wraps(WebDriver.quit)
+    def quit(self):
+        self.driver.quit()
+
+    @wraps(WebDriver.close)
+    def close(self):
+        self.driver.close()
+
+    @wraps(WebDriver.current_url)
+    def current_url(self) -> StrLink:
+        return self.driver.current_url
+
+    @property
+    @wraps(WebDriver.page_source)
+    def page_source(self) -> str:
+        return self.driver.page_source
 
     def wait_url_contains(self, url_part: str, where_wait: Optional[type[WebDriver]] = None, wait_time: int = 30) -> None:
         """
@@ -209,6 +234,10 @@ class BaseSeleniumController(object):
         if not where_wait:
             where_wait = self.driver
         WebDriverWait(where_wait, wait_time).until(EC.url_contains(url_part))
+
+    @wraps(WebDriver.__repr__)
+    def __repr__(self):
+        return self.driver.__repr__()
 
     def __enter__(self):
         return self

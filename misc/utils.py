@@ -107,7 +107,7 @@ def check_do_have_web_drivers() -> None:
     /
     Проверяет наличие компонентов веб-драйвера для работы с браузером Firefox и Chrome. Если их нету, загружает их.
     """
-    warning_message_for_all_web_drivers: Text = r'''
+    warning_message_for_all_web_drivers: Text = r''' WebDriversDownloadedAutomaticallyWarning:
 Chrome and Firefox web drivers are downloaded automatically, make sure the version of the automatically downloaded Chrome 
 and Firefox web drivers is not higher than your Chrome or Firefox browser.
 Download web drivers for Chrome and Firefox using the links:
@@ -119,7 +119,7 @@ if your system is Linux or MacOS, or C:\Program Files\web_drivers if the system 
 
 IMPORTANT: the downloaded Chrome web driver must be named only "chromedrivers" and nothing else and the Firefox web 
 driver must be named "geckodriver" and nothing else.'''
-    warning_message_for_chrome_web_driver: Text = r'''
+    warning_message_for_chrome_web_driver: Text = r''' WebDriversDownloadedAutomaticallyWarning:
 Chrome web driver are downloaded automatically, make sure the version of the automatically downloaded Chrome web driver 
 is not higher than your Chrome browser. Download web drivers for Chrome and Firefox using the links:
    ChromeDrivers -> https://chromedriver.chromium.org/downloads
@@ -128,7 +128,7 @@ Chrome driver should be in /usr/local/bin or /tmp/web_drivers(not recommended, w
 if your system is Linux or MacOS, or C:\Program Files\web_drivers if the system is windows.
 
 IMPORTANT: the downloaded Chrome web driver must be named only "chromedrivers" and nothing else.'''
-    warning_message_for_firefox_web_driver: Text = r'''
+    warning_message_for_firefox_web_driver: Text = r''' WebDriversDownloadedAutomaticallyWarning:
 Firefox web driver are downloaded automatically, make sure the version of the automatically downloaded Firefox web driver 
 is not higher than your Firefox browser. Download web drivers for Firefox using the links:
    FirefoxDrivers -> https://github.com/mozilla/geckodriver/releases
@@ -137,7 +137,7 @@ Web driver should be in /usr/local/bin or /tmp/web_drivers(not recommended, web 
 if your system is Linux or MacOS, or C:\Program Files\web_drivers if the system is windows.
 
 IMPORTANT: the Firefox web driver must be named "geckodriver" and nothing else.'''
-    warning_message_for_downloaded_web_drivers_in_tmp_file: Text = '''
+    warning_message_for_downloaded_web_drivers_in_tmp_file: Text = ''' WebDriversDownloadedInTMPFileWarning:
 Your web drivers downloaded into the /tmp/web_drivers file, it means that after a system reboot web driver will be removed. 
 Please, download web drivers in /usr/local/bin folder.
 

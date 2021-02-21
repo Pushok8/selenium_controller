@@ -6,3 +6,4 @@ for_development
 chromedriver*
 geckodriver*
 *.jar
+*.txt
