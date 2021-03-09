@@ -1,2 +1,2 @@
-from .xpath_selenium_controller import *
-from .css_selenium_controller import *
+from .xpath_selenium_controller import SeleniumController as XPATHSeleniumController
+from .css_selenium_controller import SeleniumController as CSSSeleniumController

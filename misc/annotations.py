@@ -1,29 +1,20 @@
 from pathlib import Path
-from typing import TypeVar, NewType
+from typing import TypeVar
 
-from selenium.webdriver.chrome.options import Options as COptions
-from selenium.webdriver.firefox.options import Options as FOptions
+from selenium.webdriver.remote.webdriver import WebDriver
 
 __all__ = [
-    'StrIPAddress', 'StrOfNumbers', 'StrName', 'StrFilePath', 'StrSocket', 'ChromeOptions', 'FirefoxOptions', 'StrLink',
-    'StrCSSSelector', 'StrXPath'
+    'StrIPAddress', 'StrOfNumbers', 'StrName', 'StrFilePath', 'StrSocket', 'StrLink', 'StrCSSSelector', 'StrXPath',
+    'AnyWebDriver'
 ]
 
 
-# The Options object in selenium for firefox and chrome is just called "Options", here I renamed it
-class ChromeOptions(COptions):
-    ...
-
-
-class FirefoxOptions(FOptions):
-    ...
-
-
-StrLink = NewType('StrLink', str)
-StrName = NewType('StrSocket', str)
-StrIPAddress = NewType('StrIPAddress', str)
-StrOfNumbers = NewType('StrSocket', str)
+StrLink = TypeVar('StrLink', str, str)
+StrName = TypeVar('StrName', str, str)
+StrIPAddress = TypeVar('StrIPAddress', str, str)
+StrOfNumbers = TypeVar('StrOfNumbers', str, str)
 StrFilePath = TypeVar('StrFilePath', str, Path)
-StrSocket = NewType('StrSocket', str)
-StrCSSSelector = NewType('StrCSSSelector', str)
-StrXPath = NewType('StrXPath', str)
+StrSocket = TypeVar('StrSocket', str, str)
+StrCSSSelector = TypeVar('StrCSSSelector', str, str)
+StrXPath = TypeVar('StrXPath', str, str)
+AnyWebDriver = TypeVar('AnyWebDriver', bound=WebDriver)

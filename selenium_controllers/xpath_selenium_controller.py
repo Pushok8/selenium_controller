@@ -1,4 +1,4 @@
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, overload
 
 import pyperclip
 from selenium.webdriver.remote.webdriver import WebDriver, WebElement
@@ -9,7 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 from base.base_selenium_controller import BaseSeleniumController
-from misc.annotations import StrXPath
+from misc.annotations import StrXPath, AnyWebDriver
 
 
 class SeleniumController(BaseSeleniumController):
@@ -24,7 +24,7 @@ class SeleniumController(BaseSeleniumController):
     селениума, ограниченный короткими именами функций и полиморфное поведение. Но также если понадобиться использовать
     методы, которые здесь не реализованы, можно использовать self.driver.
     """
-    def _whether_to_search_for_web_element(self, web_element: Union[WebElement, StrXPath], where_get_web_element: type[WebDriver]) -> WebElement:
+    def _whether_to_search_for_web_element(self, web_element: Union[WebElement, StrXPath], where_get_web_element: AnyWebDriver) -> WebElement:
         """
         Determines whether to look for web_element in the where_get_web_element web driver.
         /
@@ -34,7 +34,15 @@ class SeleniumController(BaseSeleniumController):
             web_element: WebElement = self.find(web_element, where_get_web_element or self.driver)
         return web_element
 
-    def find(self, xpath: StrXPath, where_get_web_element: Optional[type[WebDriver]] = None) -> WebElement:
+    @overload
+    def find(self, xpath: StrXPath) -> WebElement:
+        ...
+
+    @overload
+    def find(self, xpath: StrXPath, where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def find(self, xpath: StrXPath, where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Finds web element by xpath in where_get_web_element web driver(by default is self.driver).
         /
@@ -49,10 +57,18 @@ class SeleniumController(BaseSeleniumController):
 
         :return: web element we found./веб-элемент, который мы нашли.
         """
-        where_get_web_element: type[WebDriver] = where_get_web_element or self.driver
+        where_get_web_element: AnyWebDriver = where_get_web_element or self.driver
         return where_get_web_element.find_element_by_xpath(xpath)
 
-    def finds(self, xpath: StrXPath, where_get_web_element: Optional[type[WebDriver]] = None) -> list[WebElement, ...]:
+    @overload
+    def finds(self, xpath: StrXPath) -> list[WebElement, ...]:
+        ...
+
+    @overload
+    def finds(self, xpath: StrXPath, where_get_web_element: Optional[AnyWebDriver] = None) -> list[WebElement, ...]:
+        ...
+
+    def finds(self, xpath: StrXPath, where_get_web_element: Optional[AnyWebDriver] = None) -> list[WebElement, ...]:
         """
         Finds web elements by xpath in where_get_web_element web driver(by default is self.driver).
         /
@@ -67,13 +83,26 @@ class SeleniumController(BaseSeleniumController):
 
         :return: list of web elements found by xpath./список веб-элементов, найденных по xpath.
         """
-        where_get_web_element: type[WebDriver] = where_get_web_element or self.driver
+        where_get_web_element: AnyWebDriver = where_get_web_element or self.driver
         return where_get_web_element.find_elements_by_xpath(xpath)
+
+    @overload
+    def wait(self,
+             web_element: Union[WebElement, StrXPath],
+             wait_time: int = 30) -> WebElement:
+        ...
+
+    @overload
+    def wait(self,
+             web_element: Union[WebElement, StrXPath],
+             wait_time: int = 30,
+             where_wait: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
 
     def wait(self,
              web_element: Union[WebElement, StrXPath],
              wait_time: int = 30,
-             where_wait: Optional[type[WebDriver]] = None) -> WebElement:
+             where_wait: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Waits for the web_element object in the where_wait(by default is self.driver) object to be visible. "Visible"
         means that the visible object has a height and width more than 0 and is displayed in the browser.
@@ -106,10 +135,23 @@ class SeleniumController(BaseSeleniumController):
 
         return web_element
 
+    @overload
+    def wait_clickable(self,
+                       web_element: Union[WebElement, StrXPath],
+                       wait_time: int = 30) -> WebElement:
+        ...
+
+    @overload
     def wait_clickable(self,
                        web_element: Union[WebElement, StrXPath],
                        wait_time: int = 30,
-                       where_wait: Optional[type[WebDriver]] = None) -> WebElement:
+                       where_wait: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def wait_clickable(self,
+                       web_element: Union[WebElement, StrXPath],
+                       wait_time: int = 30,
+                       where_wait: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Waits for the web_element object in the where_wait(by default is self.driver) object to be clickable.
         /
@@ -141,10 +183,23 @@ class SeleniumController(BaseSeleniumController):
 
         return web_element
 
+    @overload
+    def wait_hide(self,
+                  web_element: Union[WebElement, StrXPath],
+                  wait_time: int = 30) -> WebElement:
+        ...
+
+    @overload
     def wait_hide(self,
                   web_element: Union[WebElement, StrXPath],
                   wait_time: int = 30,
-                  where_wait: Optional[type[WebDriver]] = None) -> WebElement:
+                  where_wait: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def wait_hide(self,
+                  web_element: Union[WebElement, StrXPath],
+                  wait_time: int = 30,
+                  where_wait: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Waits for hide the web_element object in where_wait(by default is self.driver) object.
         /
@@ -172,10 +227,33 @@ class SeleniumController(BaseSeleniumController):
 
         return web_element
 
+    @overload
+    def hover_mouse(self, web_element: Union[WebElement, StrXPath]) -> ActionChains:
+        ...
+
+    @overload
     def hover_mouse(self,
                     web_element: Union[WebElement, StrXPath],
-                    where_do_it: Optional[type[WebDriver]] = None,
-                    where_get_web_element: Optional[type[WebDriver]] = None) -> ActionChains:
+                    where_do_it: Optional[AnyWebDriver] = None) -> ActionChains:
+        ...
+
+    @overload
+    def hover_mouse(self,
+                    web_element: Union[WebElement, StrXPath],
+                    where_get_web_element: Optional[AnyWebDriver] = None) -> ActionChains:
+        ...
+
+    @overload
+    def hover_mouse(self,
+                    web_element: Union[WebElement, StrXPath],
+                    where_do_it: Optional[AnyWebDriver] = None,
+                    where_get_web_element: Optional[AnyWebDriver] = None) -> ActionChains:
+        ...
+
+    def hover_mouse(self,
+                    web_element: Union[WebElement, StrXPath],
+                    where_do_it: Optional[AnyWebDriver] = None,
+                    where_get_web_element: Optional[AnyWebDriver] = None) -> ActionChains:
         """
         Hovers the mouse over web_element in where_do_it web driver(by default, is self.driver). If
         web_element is a xpath, find it in where_get_web_element(by default, self.driver), which is passed to the
@@ -194,12 +272,11 @@ class SeleniumController(BaseSeleniumController):
         подкласса selenium.webdriver.remote.webdriver.WebDriver класс, в котором выполняются ActionChains. По умолчанию,
         where_do_it - это self.drive.
 
-        :param where_get_web_element: Optional. In which web driver we will search web element by web_element xpath, if
-        it is xpath. where_get_web_element argument can be an instance of a subclass(or the class itself) of the
-        selenium.webdriver.remote.webdriver.WebDriver class. By default, self.driver./Необязательно. В каком
-        веб-драйвере мы будем искать веб-элемент по xpath web_element, если это xpath. аргумент where_get_web_element
-        может быть экземпляром подкласса (или самого класса) selenium.webdriver.remote.webdriver.WebDriver класс. По
-        умолчанию self.driver.
+        :param where_get_web_element: Optional. An instance of a subclass of a class
+        selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default
+        where_get_web_element, self.driver./Необязательный. экземпляр подкласса
+        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы ищем web_element. По умолчанию,
+        where_get_web_element - это self.driver.
 
         :return: The ActionChains instance in which we hovered the mouse to web_element./Экземпляр ActionChains, в
         котором мы навели мышь на web_element
@@ -211,9 +288,19 @@ class SeleniumController(BaseSeleniumController):
 
         return action_for_move_mouse
 
+    @overload
+    def click(self, web_element: Union[WebElement, StrXPath]) -> WebElement:
+        ...
+
+    @overload
     def click(self,
               web_element: Union[WebElement, StrXPath],
-              where_get_web_element: Optional[type[WebDriver]] = None) -> WebElement:
+              where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def click(self,
+              web_element: Union[WebElement, StrXPath],
+              where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Clicks on web_element in where_click web driver. If web_element is a xpath, find it in where_get_web_element
         (by default, self.driver), which is passed to the function. Returns the web_element we clicked on.
@@ -225,11 +312,11 @@ class SeleniumController(BaseSeleniumController):
         :param web_element: WebElement or xpath for the web element on which we will click on./WebElement или xpath к
         веб-элементу на который мы будем кликать.
 
-        :param where_get_web_element: Optional. An instance of a subclass of the
-        selenium.webdriver.remote.webdriver.WebDriver class in which web_element we clicked on. By default
+        :param where_get_web_element: Optional. An instance of a subclass of a class
+        selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default
         where_get_web_element, self.driver./Необязательный. экземпляр подкласса
-        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы нажали на web_element. По умолчанию,
-        where_get_web_element - это self.drive.
+        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы ищем web_element. По умолчанию,
+        where_get_web_element - это self.driver.
 
         :return: the web element we clicked on./веб элемент, на который мы нажали.
         """
@@ -239,10 +326,33 @@ class SeleniumController(BaseSeleniumController):
 
         return web_element
 
+    @overload
+    def scroll_on_element(self, web_element: Union[WebElement, StrXPath]) -> WebElement:
+        ...
+
+    @overload
     def scroll_on_element(self,
                           web_element: Union[WebElement, StrXPath],
-                          where_scroll_on_web_element: Optional[type[WebDriver]] = None,
-                          where_get_web_element: Optional[type[WebDriver]] = None) -> WebElement:
+                          where_scroll_on_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    @overload
+    def scroll_on_element(self,
+                          web_element: Union[WebElement, StrXPath],
+                          where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    @overload
+    def scroll_on_element(self,
+                          web_element: Union[WebElement, StrXPath],
+                          where_scroll_on_web_element: Optional[AnyWebDriver] = None,
+                          where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def scroll_on_element(self,
+                          web_element: Union[WebElement, StrXPath],
+                          where_scroll_on_web_element: Optional[AnyWebDriver] = None,
+                          where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Scrolls to a web_element in the passed web driver where_scroll_on_web_element(by default, is self.driver). If
         web_element is a xpath, find it in where_get_web_element(by default, is self.driver), which is passed to the
@@ -259,11 +369,11 @@ class SeleniumController(BaseSeleniumController):
         :param where_scroll_on_web_element: in which web driver are we scrolling to web_element./в каком веб драйвере
         мы прокручиваем на web_element.
 
-        :param where_get_web_element: Optional. An instance of a subclass of the
-        selenium.webdriver.remote.webdriver.WebDriver class in which web_element we clicked on. By default
+        :param where_get_web_element: Optional. An instance of a subclass of a class
+        selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default
         where_get_web_element, self.driver./Необязательный. экземпляр подкласса
-        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы нажали на web_element. По умолчанию,
-        where_get_web_element - это self.drive.
+        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы ищем web_element. По умолчанию,
+        where_get_web_element - это self.driver.
 
         :return: the web element we scrolled to./веб-элемент, к которому мы прокрутили.
         """
@@ -274,9 +384,19 @@ class SeleniumController(BaseSeleniumController):
 
         return web_element
 
+    @overload
+    def clear(self, web_element: Union[WebElement, StrXPath]) -> WebElement:
+        ...
+
+    @overload
     def clear(self,
               web_element: Union[WebElement, StrXPath],
-              where_get_web_element: Optional[type[WebDriver]] = None) -> WebElement:
+              where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def clear(self,
+              web_element: Union[WebElement, StrXPath],
+              where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Clears text in the web_element in the passed web driver where_scroll_on_web_element(by default, is self.driver).
         If web_element is a xpath, find it in where_get_web_element(by default, is self.driver), which is passed to the
@@ -290,11 +410,11 @@ class SeleniumController(BaseSeleniumController):
         :param web_element: WebElement or xpath for the web element in which we will clear the text./WebElement или
         xpath к веб-элементу в котором мы очистим тескт.
 
-        :param where_get_web_element: Optional. An instance of a subclass of the
-        selenium.webdriver.remote.webdriver.WebDriver class in which web_element we clicked on. By default
+        :param where_get_web_element: Optional. An instance of a subclass of a class
+        selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default
         where_get_web_element, self.driver./Необязательный. экземпляр подкласса
-        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы нажали на web_element. По умолчанию,
-        where_get_web_element - это self.drive.
+        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы ищем web_element. По умолчанию,
+        where_get_web_element - это self.driver.
 
         :return: web element from which all have been removed./веб-элемент из которого удалили всё.
         """
@@ -306,10 +426,21 @@ class SeleniumController(BaseSeleniumController):
 
         return web_element
 
+    @overload
+    def send_keys_clean(self, web_element: Union[WebElement, StrXPath], what_to_send: Any) -> WebElement:
+        ...
+
+    @overload
     def send_keys_clean(self,
                         web_element: Union[WebElement, StrXPath],
                         what_to_send: Any,
-                        where_get_web_element: Optional[type[WebDriver]] = None) -> WebElement:
+                        where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def send_keys_clean(self,
+                        web_element: Union[WebElement, StrXPath],
+                        what_to_send: Any,
+                        where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Presses the keyboard shortcut Ctrl + a into the web_element in the passed web driver where_scroll_on_web_element
         (by default, is self.driver), then deletes all in the web_element and finally sends the what_to_send object into
@@ -330,10 +461,10 @@ class SeleniumController(BaseSeleniumController):
         method./любой объект, который вы можете передать в selenium.webdriver.remote.webelement.WebElement.send_keys
         метод.
 
-        :param where_get_web_element: Optional. An instance of a subclass of the
-        selenium.webdriver.remote.webdriver.WebDriver class in which web_element we clicked on. By default
+        :param where_get_web_element: Optional. An instance of a subclass of a class
+        selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default
         where_get_web_element, self.driver./Необязательный. экземпляр подкласса
-        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы нажали на web_element. По умолчанию,
+        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы ищем web_element. По умолчанию,
         where_get_web_element - это self.driver.
 
         :return: the web element to which what_to_send was sent./веб-элемент в который отправили what_to_send.
@@ -346,10 +477,21 @@ class SeleniumController(BaseSeleniumController):
 
         return web_element
 
+    @overload
+    def paste(self, web_element: Union[WebElement, StrXPath], what_to_paste: Any) -> WebElement:
+        ...
+
+    @overload
     def paste(self,
               web_element: Union[WebElement, StrXPath],
               what_to_paste: Any,
-              where_get_web_element: Optional[type[WebDriver]] = None) -> WebElement:
+              where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
+        ...
+
+    def paste(self,
+              web_element: Union[WebElement, StrXPath],
+              what_to_paste: Any,
+              where_get_web_element: Optional[AnyWebDriver] = None) -> WebElement:
         """
         Inserts what_to_paste into the web_element in the passed web driver where_scroll_on_web_element(by default, is
         self.driver). If web_element is a xpath, find it in where_get_web_element(by default, is self.driver),
@@ -366,10 +508,10 @@ class SeleniumController(BaseSeleniumController):
         :param what_to_paste: any object that can be copied via the keyboard shortcuts Ctrl + C./любой объект, который
         можно скопировать через сочетания клавишь Ctrl + C.
 
-        :param where_get_web_element: Optional. An instance of a subclass of the
-        selenium.webdriver.remote.webdriver.WebDriver class in which web_element we clicked on. By default
+        :param where_get_web_element: Optional. An instance of a subclass of a class
+        selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default
         where_get_web_element, self.driver./Необязательный. экземпляр подкласса
-        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы нажали на web_element. По умолчанию,
+        selenium.webdriver.remote.webdriver.WebDriver класс, в котором мы ищем web_element. По умолчанию,
         where_get_web_element - это self.driver.
 
         :return: the web element in which the what_to_paste was inserted./веб-элемент в который вставили what_to_paste.
