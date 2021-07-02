@@ -15,16 +15,19 @@ from base.base_selenium_controller import BaseSeleniumController
 class SeleniumController(BaseSeleniumController):
     """
     It is a Selenium Controller which sticks to using a css-selectors to interact with a web elements. In all method
-    these class used css selector. This class implements a simplified interface for interaction with selenium web driver,
-    limited to short function names and polymorphic behavior. But also if you need to use methods that are not implemented
-    here, you can use self.driver.
+    these class used css selector. This class implements a simplified interface for interaction with selenium web
+    driver, limited to short function names and polymorphic behavior. But also if you need to use methods that are not
+    implemented here, you can use self.driver.
     /
     Это Selenium Controller, который придерживается использования css-селектора для взаимодействия с веб-элементами.
     Во всех методах этот класс использует css-селектор. Этот класс реализует упрощенный интерфейс взаимодействия с веб
-    драйвером селениума, ограниченный короткими именами функций и полиморфное поведение. Но также если понадобиться
+    драйвером selenium, ограниченный короткими именами функций и полиморфное поведение. Но также если понадобиться
     использовать методы, которые здесь не реализованы, можно использовать self.driver.
     """
-    def _define_web_element(self, web_element: Union[AnyWebDriver, WebElement, StrCSSSelector]) -> Union[AnyWebDriver, WebElement]:
+    def _define_web_element(
+            self,
+            web_element: Union[AnyWebDriver, WebElement, StrCSSSelector]
+    ) -> Union[AnyWebDriver, WebElement]:
         """
         Handles web_element. If web_element is None, return self.driver, if web_element is css-selector return founded
         web element, if web_element is something else, returns it.
