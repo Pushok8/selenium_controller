@@ -16,15 +16,17 @@ class SeleniumController(BaseSeleniumController):
     """
     It is a Selenium Controller which sticks to using a xpath to interact with a web elements. In all method
     these class used xpath. This class implements a simplified interface for interaction with selenium web driver,
-    limited to short function names and polymorphic behavior. But also if you need to use methods that are not implemented
-    here, you can use self.driver.
+    limited to short function names and polymorphic behavior. But also if you need to use methods that are not
+    implemented here, you can use self.driver.
     /
     Это Selenium Controller, который придерживается использования xpath для взаимодействия с веб-элементами. Во всех
     методах этот класс использует xpath. Этот класс реализует упрощенный интерфейс взаимодействия с веб драйвером
-    селениума, ограниченный короткими именами функций и полиморфное поведение. Но также если понадобиться использовать
+    selenium, ограниченный короткими именами функций и полиморфное поведение. Но также если понадобиться использовать
     методы, которые здесь не реализованы, можно использовать self.driver.
     """
-    def _whether_to_search_for_web_element(self, web_element: Union[WebElement, StrXPath], where_get_web_element: AnyWebDriver) -> WebElement:
+    def _whether_to_search_for_web_element(self,
+                                           web_element: Union[WebElement, StrXPath],
+                                           where_get_web_element: AnyWebDriver) -> WebElement:
         """
         Determines whether to look for web_element in the where_get_web_element web driver.
         /
@@ -174,7 +176,7 @@ class SeleniumController(BaseSeleniumController):
         """
         if isinstance(web_element, WebElement):
             web_element: WebElement = WebDriverWait(where_wait or self.driver, wait_time).until(
-                lambda driver: web_element if web_element.is_displayed() else False if not EC.invisibility_of_element_located(web_element)(driver) else False
+                self._get_element_if_displayed(web_element)
             )
         else:
             web_element: WebElement = WebDriverWait(where_wait or self.driver, wait_time).until(
@@ -221,9 +223,11 @@ class SeleniumController(BaseSeleniumController):
         :return: the web element we've been waiting for./веб-элемент, который мы ждали.
         """
         if not isinstance(web_element, WebElement):
-            web_element = (By.XPATH, web_element)
+            web_element: tuple[str, WebElement] = (By.XPATH, web_element)
 
-        web_element: WebElement = WebDriverWait(where_wait or self.driver, wait_time).until(EC.invisibility_of_element(web_element))
+        web_element: WebElement = WebDriverWait(where_wait or self.driver, wait_time).until(
+            EC.invisibility_of_element(web_element)
+        )
 
         return web_element
 
@@ -408,7 +412,7 @@ class SeleniumController(BaseSeleniumController):
 
 
         :param web_element: WebElement or xpath for the web element in which we will clear the text./WebElement или
-        xpath к веб-элементу в котором мы очистим тескт.
+        xpath к веб-элементу в котором мы очистим текст.
 
         :param where_get_web_element: Optional. An instance of a subclass of a class
         selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default
@@ -506,7 +510,7 @@ class SeleniumController(BaseSeleniumController):
         WebElement или xpath к веб-элементу в который мы вставили what_to_paste.
 
         :param what_to_paste: any object that can be copied via the keyboard shortcuts Ctrl + C./любой объект, который
-        можно скопировать через сочетания клавишь Ctrl + C.
+        можно скопировать через сочетания клавиш Ctrl + C.
 
         :param where_get_web_element: Optional. An instance of a subclass of a class
         selenium.webdriver.remote.webdriver.WebDriver in which we are looking for web_element. Default

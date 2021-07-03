@@ -7,3 +7,4 @@ chromedriver*
 geckodriver*
 *.jar
 *.txt
+main.py

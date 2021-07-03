@@ -122,7 +122,7 @@ class SeleniumController(BaseSeleniumController):
         selenium.webdriver.remote.webdriver.WebDriver class or selenium.webdriver.remote.webelement.WebElement or
         css_selector to web element. By default, where_get_web_element is self.driver./Необязательно. В каком WebDriver
         или WebElement мы будем искать веб элементы по css_selector. В аргумент where_get_web_elements вы можете
-        передать экземплярподкласса selenium.webdriver.remote.webdriver.WebDriver класс или
+        передать экземпляр подкласса selenium.webdriver.remote.webdriver.WebDriver класс или
         selenium.webdriver.remote.webelement.WebElement или css_selector к веб-элементу. По умолчанию,
         where_get_web_element - это self.driver
 
@@ -174,7 +174,9 @@ class SeleniumController(BaseSeleniumController):
         if isinstance(web_element, WebElement):
             web_element: WebElement = WebDriverWait(where_wait, wait_time).until(EC.visibility_of(web_element))
         else:
-            web_element: WebElement = WebDriverWait(where_wait, wait_time).until(EC.visibility_of_element_located((By.CSS_SELECTOR, web_element)))
+            web_element: WebElement = WebDriverWait(where_wait, wait_time).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, web_element))
+            )
 
         return web_element
 
@@ -218,7 +220,7 @@ class SeleniumController(BaseSeleniumController):
         where_wait = self._define_web_element(where_wait)
         if isinstance(web_element, WebElement):
             web_element: WebElement = WebDriverWait(where_wait, wait_time).until(
-                lambda driver: web_element if web_element.is_displayed() else False if not EC.invisibility_of_element_located(web_element)(driver) else False
+                self._get_element_if_displayed(web_element)
             )
         else:
             web_element: WebElement = WebDriverWait(where_wait, wait_time).until(
@@ -266,7 +268,7 @@ class SeleniumController(BaseSeleniumController):
         """
         where_wait = self._define_web_element(where_wait)
         if not isinstance(web_element, WebElement):
-            web_element = (By.CSS_SELECTOR, web_element)
+            web_element: tuple[str, WebElement] = (By.CSS_SELECTOR, web_element)
 
         web_element: WebElement = WebDriverWait(where_wait, wait_time).until(EC.invisibility_of_element(web_element))
 
@@ -283,26 +285,32 @@ class SeleniumController(BaseSeleniumController):
         ...
 
     @overload
-    def hover_mouse(self,
-                    web_element: Union[WebElement, StrCSSSelector],
-                    where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> ActionChains:
+    def hover_mouse(
+            self,
+            web_element: Union[WebElement, StrCSSSelector],
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+    ) -> ActionChains:
         ...
 
     @overload
-    def hover_mouse(self,
-                    web_element: Union[WebElement, StrCSSSelector],
-                    where_do_it: Optional[AnyWebDriver] = None,
-                    where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> ActionChains:
+    def hover_mouse(
+            self,
+            web_element: Union[WebElement, StrCSSSelector],
+            where_do_it: Optional[AnyWebDriver] = None,
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+    ) -> ActionChains:
         ...
 
-    def hover_mouse(self,
-                    web_element: Union[WebElement, StrCSSSelector],
-                    where_do_it: Optional[AnyWebDriver] = None,
-                    where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> ActionChains:
+    def hover_mouse(
+            self,
+            web_element: Union[WebElement, StrCSSSelector],
+            where_do_it: Optional[AnyWebDriver] = None,
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+    ) -> ActionChains:
         """
         Hovers the mouse over web_element in where_do_it web driver(by default, is self.driver). If
-        web_element is a css selector, find it in where_get_web_element(by default, is self.driver), which is passed to the
-        function. Returns an instance of the ActionChains class in which we hovered over the web_element.
+        web_element is a css selector, find it in where_get_web_element(by default, is self.driver), which is passed to
+        the function. Returns an instance of the ActionChains class in which we hovered over the web_element.
         /
         Наводит указатель мышки на web_element в веб драйвере where_do_it(по умолчанию, self.driver). Если web_element
         является css-селектором, находит его в where_get_web_element(по умолчанию, self.driver), который передается в
@@ -351,8 +359,8 @@ class SeleniumController(BaseSeleniumController):
               where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> WebElement:
         """
         Clicks on web_element in where_get_web_element(by default, is self.driver) web driver or web element. If
-        web_element is a css selector, find it in where_get_web_element(by default, is self.driver), which is passed to the
-        function. Returns the web_element we clicked on.
+        web_element is a css selector, find it in where_get_web_element(by default, is self.driver), which is passed
+        to the function. Returns the web_element we clicked on.
         /
         Нажимает на web_element в веб-драйвере или веб-элементе where_get_web_element. Если web_element является
         css-селектором, находит его в where_get_web_element(по умолчанию, self.driver), который передается в функцию.
@@ -390,22 +398,28 @@ class SeleniumController(BaseSeleniumController):
         ...
 
     @overload
-    def scroll_on_element(self,
-                          web_element: Union[WebElement, StrCSSSelector],
-                          where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> WebElement:
+    def scroll_on_element(
+            self,
+            web_element: Union[WebElement, StrCSSSelector],
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+    ) -> WebElement:
         ...
 
     @overload
-    def scroll_on_element(self,
-                          web_element: Union[WebElement, StrCSSSelector],
-                          where_scroll_on_web_element: Optional[AnyWebDriver] = None,
-                          where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> WebElement:
+    def scroll_on_element(
+            self,
+            web_element: Union[WebElement, StrCSSSelector],
+            where_scroll_on_web_element: Optional[AnyWebDriver] = None,
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+    ) -> WebElement:
         ...
 
-    def scroll_on_element(self,
-                          web_element: Union[WebElement, StrCSSSelector],
-                          where_scroll_on_web_element: Optional[AnyWebDriver] = None,
-                          where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> WebElement:
+    def scroll_on_element(
+            self,
+            web_element: Union[WebElement, StrCSSSelector],
+            where_scroll_on_web_element: Optional[AnyWebDriver] = None,
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+            ) -> WebElement:
         """
         Scrolls to a web_element in the passed web driver where_scroll_on_web_element(by default, is self.driver). If
         web_element is a css-selector, find it in where_get_web_element(by default, is self.driver), which is passed to
@@ -454,9 +468,9 @@ class SeleniumController(BaseSeleniumController):
               web_element: Union[WebElement, StrCSSSelector],
               where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> WebElement:
         """
-        Clears text in the web_element in the passed web driver where_scroll_on_web_element(by default, is self.driver). If
-        web_element is a css-selector, find it in where_get_web_element(by default, is self.driver), which is passed to the
-        function. Returns the web element in which we have cleared the text.
+        Clears text in the web_element in the passed web driver where_scroll_on_web_element(by default, is self.driver).
+        If web_element is a css-selector, find it in where_get_web_element(by default, is self.driver), which is passed
+        to the function. Returns the web element in which we have cleared the text.
         /
         Очищает текст в web_element в переданном веб драйвере where_scroll_on_web_element(по умолчанию, self.driver).
         Если web_element является css-селектором, находит его в where_get_web_element(по умолчанию, self.driver),
@@ -464,7 +478,7 @@ class SeleniumController(BaseSeleniumController):
 
 
         :param web_element: WebElement or css selector for the web element in which we will clear the text./WebElement
-        или css-селектор к веб-элементу в котором мы очистим тескт.
+        или css-селектор к веб-элементу в котором мы очистим текст.
 
         :param where_get_web_element: Optional. In which WebDriver or WebElement we will be search for web_element if he
         is css-selector. In the argument where_get_web_element you can pass an instance of a subclass of the
@@ -490,16 +504,21 @@ class SeleniumController(BaseSeleniumController):
         ...
 
     @overload
-    def send_keys_clean(self,
-                        web_element: Union[WebElement, StrCSSSelector],
-                        what_to_send: Any,
-                        where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> WebElement:
+    def send_keys_clean(
+            self,
+            web_element: Union[WebElement, StrCSSSelector],
+            what_to_send: Any,
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+    ) -> WebElement:
         ...
 
-    def send_keys_clean(self,
-                        web_element: Union[WebElement, StrCSSSelector],
-                        what_to_send: Any,
-                        where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None) -> WebElement:
+    def send_keys_clean(
+            self,
+
+            web_element: Union[WebElement, StrCSSSelector],
+            what_to_send: Any,
+            where_get_web_element: Optional[Union[AnyWebDriver, WebElement, StrCSSSelector]] = None
+    ) -> WebElement:
         """
         Presses the keyboard shortcut Ctrl + a into the web_element in the passed web driver where_scroll_on_web_element
         (by default, is self.driver), then deletes all in the web_element and finally sends the what_to_send object into
@@ -568,7 +587,7 @@ class SeleniumController(BaseSeleniumController):
         WebElement или css-селектор к веб-элементу в который мы вставили what_to_paste.
 
         :param what_to_paste: any object that can be copied via the keyboard shortcuts Ctrl + C./любой объект, который
-        можно скопировать через сочетания клавишь Ctrl + C.
+        можно скопировать через сочетания клавиш Ctrl + C.
 
         :param where_get_web_element: Optional. In which WebDriver or WebElement we will be search for web_element if he
         is css-selector. In the argument where_get_web_element you can pass an instance of a subclass of the

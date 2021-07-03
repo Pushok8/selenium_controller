@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Union, Optional, ClassVar
 
-from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.remote.webdriver import WebDriver, WebElement
 from selenium.webdriver import ChromeOptions, FirefoxOptions
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.support.wait import WebDriverWait
@@ -43,8 +43,8 @@ class BaseSeleniumController:
         /
         По переданным аргументам определяет, какой драйвер должен быть создан и с какими параметрами.
 
-        Если вы передадите объект FirefoxOptions или ChromeOptions, он будет использоваться для создания объекта драйвера,
-        но в любом случае дополнительные аргументы будут добавлены в FirefoxOptions или ChromeOptions.
+        Если вы передадите объект FirefoxOptions или ChromeOptions, он будет использоваться для создания объекта
+        драйвера, но в любом случае дополнительные аргументы будут добавлены в FirefoxOptions или ChromeOptions.
 
         Если вы передадите удаленный серверный сокет use_remote_server, будет создан Remote драйвер. Сокет - это
         IP-адрес и порт, разделенные двоеточием (IP_ADDRESS:PORT). Например: сокет - это 127.0.0.1:4444
@@ -53,9 +53,11 @@ class BaseSeleniumController:
         может быть с авторизация и без.
 
 
-        :param web_driver: Absolute path to the browser driver. Driver can be obtained from the links:
-          For Chrome: https://chromedriver.chromium.org/downloads
-          For FireFox: https://github.com/mozilla/geckodriver/releases
+        :param web_driver:
+          Absolute or relative path to the browser driver. Driver can be obtained from the links:
+          Абсолютный или относительный путь к драйверу браузера. Драйвер можно получить по ссылкам:
+            For Chrome: https://chromedriver.chromium.org/downloads
+            For FireFox: https://github.com/mozilla/geckodriver/releases
 
         :param browser_name: By default - 'CHROME', can be 'CHROME' or 'FIREFOX'./По умолчанию - 'CHROME', может быть
           'CHROME' или 'FIREFOX'.
@@ -230,6 +232,17 @@ class BaseSeleniumController:
         """
         where_wait = where_wait or self.driver
         WebDriverWait(where_wait, wait_time).until(EC.url_contains(url_part))
+
+    @staticmethod
+    def _get_element_if_displayed(web_element: WebElement):
+        def get_element_if_displayed(driver: AnyWebDriver):
+            if web_element.is_displayed():
+                return web_element
+            else:
+                if not EC.invisibility_of_element_located(web_element)(driver):
+                    return web_element
+
+        return get_element_if_displayed
 
     @wraps(WebDriver.__repr__)
     def __repr__(self):
